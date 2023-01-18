@@ -1,0 +1,23 @@
+#flink1 DHCP Server /28
+{% set ifname1 = "flink1" %}
+{% set ipaddr = _SYSTEM_interface_flink1.split('/', 1)[0] %}
+ 
+config system dhcp server
+    edit 19
+        set default-gateway {{ ipaddr }}
+        set interface {{ ifname1 }}
+        ##verify if subnet mask is /24
+        {% if _SYSTEM_interface_flink1.split('/', 1)[1] == "24" %}
+             set netmask "255.255.255.0" 
+        {% elif _SYSTEM_interface_flink1.split('/', 1)[1] == "28" %}
+            set netmask "255.255.255.240"
+        {% endif %}        
+        config ip-range
+            edit 1
+                set start-ip {{ (ipaddr.split('.')[0:3]  | join('.')) }}.2
+                set end-ip {{ (ipaddr.split('.')[0:3]  | join('.')) }}.14
+            next
+        end
+        set dns-service local
+    next
+end
